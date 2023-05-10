@@ -3,9 +3,9 @@ jobs:
   myJob:
     runs-on: ubuntu-latest
     steps:
-      - name: Cryptosoft-SBOM-generator.
+      - name: Cryptosoft-SBOM-generator
         id: Cryptosoft-SBOM-generator
         uses: CryptosoftInc/Cryptosoft-SBOM-generator@1.0.0
         with:
           dt-url:  "https://dt-api-test-action.staging.cryptosoft.com/api/v1/bom"
-          api-key: '413bY1e0LknCNnxFJI1S7wzdGpxGR6AS ' 
+          api-key: 'KyIza0zt4LPZAIcap5fbth6dnzcHUFU6 ' 
