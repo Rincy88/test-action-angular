@@ -1,10 +1,31 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            cloud 'kubernetes'
+            yaml """
+                apiVersion: v1
+                kind: Pod
+                spec:
+                  containers:
+                  - name: jnlp
+                    image: jenkins/inbound-agent:3107.v665000b_51092-15
+                    resources:
+                      limits:
+                        cpu: '1'
+                        memory: '2Gi'
+                      requests:
+                        cpu: '900m'
+                        memory: '1Gi'
+                    tty: true
+            """
+        }
+    }
 
     tools {
         nodejs "node"
+        maven "maven"
     }
-  
+
 
     stages {
         stage('Checkout') {
@@ -12,28 +33,28 @@ pipeline {
                 checkout scm
             }
         }
-       
-        // stage('Install Dependencies') {
-        //     steps {
-        //         sh 'npm install'
-        //     }
-        // }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
         stage('Install SBOM tool') {
             steps {
                 sh 'npm install -g @cyclonedx/cdxgen'
             }
         }
-        
+
         stage('Generate SBOM') {
             steps {
-                sh 'export FETCH_LICENSE=true && cdxgen -o bom.json'
+                sh 'export FETCH_LICENSE=true && cdxgen -r -o bom.json'
                 script {
                     def sbom = readFile('bom.json')
                     echo "Generated SBOM:\n$sbom"
                 }
             }
         }
-              
+
         stage('Upload SBOM to Dependency-Track') {
             steps {
                 withCredentials([string(credentialsId: 'apikey', variable: 'X_API_KEY')]) {
@@ -42,8 +63,8 @@ pipeline {
                     -H "Content-Type:multipart/form-data" \
                     -H "X-Api-Key:${X_API_KEY}" \
                     -F "autoCreate=true" \
-                    -F "projectName=Jenkinsreact" \
-                    -F "projectVersion=1.23" \
+                    -F "projectName=Jenkinsangular" \
+                    -F "projectVersion=1.22" \
                     -F "bom=@bom.json"
                     """
                 }
