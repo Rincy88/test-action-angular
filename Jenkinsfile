@@ -23,7 +23,6 @@ pipeline {
 
     tools {
         nodejs "node"
-        maven "maven"
     }
 
 
