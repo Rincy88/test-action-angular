@@ -1,11 +1,22 @@
 on: push
 jobs:
   myJob:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    
     steps:
-      - name: Cryptosoft-SBOM-generator
-        id: Cryptosoft-SBOM-generator
-        uses: CryptosoftInc/Cryptosoft-SBOM-generator@1.0.0
-        with:
-          dt-url:  "https://dt-api-test-action.staging.cryptosoft.com/api/v1/bom"
-          api-key: 'KyIza0zt4LPZAIcap5fbth6dnzcHUFU6 ' 
+      - uses: actions/checkout@v2 
+      - run: npm install
+        shell: bash
+      - run: |
+             export FETCH_LICENSE=true
+             npm install -g @cyclonedx/cdxgen@8.6.0 && cdxgen -r -o bom.json
+        shell: bash
+      - run: |
+            curl -k -X POST "https://dt-api.staging.cryptosoft.com/api/v1/bom" \
+              -H "Content-Type: multipart/form-data" \
+              -H "X-Api-Key: 1DMIXAnGtTIeTQDddlHSvpj6d3as174S " \
+              -F "autoCreate=true" \
+              -F "projectName=cs-backend1" \
+              -F "projectVersion=1.0.0" \
+              -F "bom=@bom.json" 
+        shell: bash
+
